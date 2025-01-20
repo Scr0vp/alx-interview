@@ -1,61 +1,40 @@
 #!/usr/bin/python3
-""" Prime Game """
-
-
-def isprime(n):
-    """ Return prime number """
-    for i in range(2, n):
-        if n % i == 0:
-            return False
-    return True
-
-
-def delete_numbers(n, nums):
-    """ Remove numbers - return zero """
-    for i in range(len(nums)):
-        if nums[i] % n == 0:
-            nums[i] = 0
-
 
 def isWinner(x, nums):
-    """ Return name of player that won
-    most rounds
-    """
-    nums.sort()
-    winner = False
-    Maria = 0
-    Ben = 0
-    for game in range(x):
-        # prints("game# ", game+1)
-        nums2 = list(range(1, nums[game] + 1))
-        # print("nums: ", nums2)
-        turn = 0
-        while True:
-            """
-            # monitor turns, uncomment to watch
-            if turn % 2 != 0:
-                print("Ben turn ")
-            else:
-                print("Maria turn ")
-            """
-            change = False
-            for i, n in enumerate(nums2):
-                # print("n: ", n, "i: ", i)
-                if n > 1 and isprime(n):
-                    delete_numbers(n, nums2)
-                    change = True
-                    turn += 1
-                    break
-            # print("movement: ". nums2)
-            if change is False:
-                break
-        if turn % 2 != 0:
-            Maria += 1
-        else:
-            Ben += 1
-        # print("Maria: {}, Ben: {}".format(Maria, Ben))
-    if Maria == Ben:
+    """Determine the winner of the prime game."""
+    if not nums or x <= 0:
         return None
-    if Maria > Ben:
+    
+    max_n = max(nums)
+    
+    # Step 1: Precompute prime numbers using the Sieve of Eratosthenes
+    primes = [True] * (max_n + 1)
+    primes[0] = primes[1] = False  # 0 and 1 are not prime
+    
+    for i in range(2, int(max_n ** 0.5) + 1):
+        if primes[i]:
+            for j in range(i * i, max_n + 1, i):
+                primes[j] = False
+    
+    # Step 2: Count primes up to each number
+    prime_count = [0] * (max_n + 1)
+    for i in range(1, max_n + 1):
+        prime_count[i] = prime_count[i - 1] + (1 if primes[i] else 0)
+    
+    # Step 3: Simulate the game for each round
+    maria_wins = 0
+    ben_wins = 0
+    
+    for n in nums:
+        if prime_count[n] % 2 == 1:  # Odd count -> Maria wins
+            maria_wins += 1
+        else:  # Even count -> Ben wins
+            ben_wins += 1
+    
+    # Step 4: Determine the overall winner
+    if maria_wins > ben_wins:
         return "Maria"
-    return "Ben"
+    elif ben_wins > maria_wins:
+        return "Ben"
+    else:
+        return None
